@@ -32,7 +32,7 @@ impl Term {
 			yazi_adapter::Mux::tmux_passthrough();
 		}
 
-		execute!(
+		if execute!(
 			TTY.writer(),
 			screen::SetScreen(true),
 			Print("\x1bP$q q\x1b\\"), // Request cursor shape (DECRQSS query for DECSCUSR)
@@ -42,7 +42,9 @@ impl Term {
 			screen::SetScreen(false),
 			EnableBracketedPaste,
 			mouse::SetMouse(true),
-		)?;
+		).is_err() {
+                        eprintln!("ConPTY is not supported");
+                }
 
 		let resp = Emulator::read_until_da1();
 		Mux::tmux_drain()?;
